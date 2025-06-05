@@ -2,6 +2,7 @@
 #include <deque>
 #include <map>
 #include <unordered_map>
+#include <functional>
 
 enum class OrderType {
     LIMIT,
@@ -19,13 +20,16 @@ struct Order {
 
 class OrderBook {
 public:
+    OrderBook();
+
     void add_order(const Order& order);
     void cancel_order(int id);
     void print_book();
 
 private:
-    std::map<double, std::deque<Order>, std::greater<>> bids;
-    std::map<double, std::deque<Order>> asks;
+    using BookSide = std::map<double, std::deque<Order>, std::function<bool(double, double)>>;
+    BookSide bids;
+    BookSide asks;
     std::unordered_map<int, Order> order_map;
 
     void match_order(const Order& order);
