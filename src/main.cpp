@@ -1,18 +1,46 @@
 #include "orderbook.hpp"
 #include <chrono>
+#include <random>
+#include <iostream>
 
 int main() {
     OrderBook book;
+    const int NUM_ORDERS = 100000;
 
-    auto now = std::chrono::high_resolution_clock::now();
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> price_dist(95.0, 105.0);
+    std::uniform_int_distribution<> qty_dist(1, 20);
+    std::bernoulli_distribution side_dist(0.5);
 
-    book.add_order({1, 101.0, 10, true, OrderType::LIMIT, now});
-    book.add_order({2, 100.0, 5, false, OrderType::LIMIT, std::chrono::high_resolution_clock::now()});
-    book.add_order({3, 99.0, 20, false, OrderType::LIMIT, std::chrono::high_resolution_clock::now()});
-    book.add_order({4, 0.0, 15, true, OrderType::MARKET, std::chrono::high_resolution_clock::now()});
+    auto start = std::chrono::high_resolution_clock::now();
 
-    book.print_book();
-    book.print_trade_tape();
+    for (int i = 1; i <= NUM_ORDERS; ++i) {
+        double price = price_dist(gen);
+        int quantity = qty_dist(gen);
+        bool is_buy = side_dist(gen);
 
+        Order order = {
+            .id = i,
+            .price = price,
+            .quantity = quantity,
+            .is_buy = is_buy,
+            .type = OrderType::LIMIT,
+            .timestamp = std::chrono::high_resolution_clock::now()
+        };
+
+        book.add_order(order);
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto total_us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    double avg_us_per_order = total_us / static_cast<double>(NUM_ORDERS);
+
+    std::cout << "\n✅ Bulk order test complete\n";
+    std::cout << "Total orders:     " << NUM_ORDERS << "\n";
+    std::cout << "Elapsed time:     " << total_us << " µs\n";
+    std::cout << "Avg per order:    " << avg_us_per_order << " µs\n";
+
+    book.print_stats();
     return 0;
 }
