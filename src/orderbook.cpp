@@ -50,6 +50,20 @@ void OrderBook::match_order(const Order& incoming) {
             std::cout << "Match: " << temp.id << " with " << resting.id
                       << " qty " << trade_qty << " @ " << resting.price << "\n";
 
+            // Log to trade tape
+            auto now = std::chrono::high_resolution_clock::now();
+            trade_tape.push_back({
+                .buy_order_id = temp.is_buy ? temp.id : resting.id,
+                .sell_order_id = temp.is_buy ? resting.id : temp.id,
+                .price = resting.price,
+                .quantity = trade_qty,
+                .timestamp = now,
+                .buy_queue_time = std::chrono::duration_cast<std::chrono::microseconds>(
+                    now - (temp.is_buy ? temp.timestamp : resting.timestamp)),
+                .sell_queue_time = std::chrono::duration_cast<std::chrono::microseconds>(
+                    now - (temp.is_buy ? resting.timestamp : temp.timestamp))
+            });
+
             temp.quantity -= trade_qty;
             resting.quantity -= trade_qty;
 
@@ -82,5 +96,15 @@ void OrderBook::print_book() {
         for (const auto& order : queue)
             std::cout << "(" << order.id << ", " << order.quantity << ") ";
         std::cout << "\n";
+    }
+}
+
+void OrderBook::print_trade_tape() {
+    std::cout << "\n--- TRADE TAPE ---\n";
+    for (const auto& trade : trade_tape) {
+        std::cout << "BUY " << trade.buy_order_id << " | SELL " << trade.sell_order_id
+                  << " | Price: " << trade.price << " | Qty: " << trade.quantity
+                  << " | Buy Wait: " << trade.buy_queue_time.count() << "µs"
+                  << " | Sell Wait: " << trade.sell_queue_time.count() << "µs\n";
     }
 }
