@@ -1,3 +1,5 @@
 /Users/sathwikdoddi/Desktop/orderbook/build/CMakeFiles/engine.dir
+/Users/sathwikdoddi/Desktop/orderbook/build/CMakeFiles/server.dir
+/Users/sathwikdoddi/Desktop/orderbook/build/CMakeFiles/client.dir
 /Users/sathwikdoddi/Desktop/orderbook/build/CMakeFiles/edit_cache.dir
 /Users/sathwikdoddi/Desktop/orderbook/build/CMakeFiles/rebuild_cache.dir
